@@ -1,0 +1,10 @@
+@host=http://localhost:5181
+@adminId=0fdffa3f-2e1e-47e6-b656-0691797dd486
+
+POST {{host}}/Subscriptions
+Content-Type: application/json
+
+{
+    "SubscriptionType": "Free",
+    "AdminId": "{{adminId}}"
+}
