@@ -1,4 +1,4 @@
-using GymManagement.Application.Commands.CreateSubscription;
+using GymManagement.Application.Subscriptions.Commands.CreateSubscription;
 using GymManagement.Contracts.Subcriptions;
 using GymManagement.Contracts.Subscriptions;
 using MediatR;
@@ -20,9 +20,20 @@ namespace GymManagement.Api.Controllers
     public async Task<IActionResult> CreateSubscription(CreateSubscriptionRequest request)
     {
       var command = new CreateSubscriptionCommand(request.SubscriptionType.ToString(),request.AdminId);
-      var subcsriptionId = await _mediator.Send(command);
-      var response = new SubscriptionResponse(subcsriptionId,request.SubscriptionType);
-      return Ok(response);
+      var createSubscriptionResult = await _mediator.Send(command);
+
+      return createSubscriptionResult.MatchFirst(
+          subscription => Ok(new SubscriptionResponse(subscription.Id, request.SubscriptionType)),
+          error => Problem()
+      );
+
+      // if (createSubscriptionResult.IsError)
+      // {
+      //   return Problem();
+      // }
+
+      // var response = new SubscriptionResponse(createSubscriptionResult.Value, request.SubscriptionType);
+      // return Ok(response);
     }
   }
 }
