@@ -13,6 +13,8 @@
   <ItemGroup>
     <Folder Include="Common\" />
     <Folder Include="Common\Interfaces\" />
+    <Folder Include="Subscriptions\Queries\" />
+    <Folder Include="Subscriptions\Queries\GetSubscription\" />
   </ItemGroup>
 
   <PropertyGroup>
