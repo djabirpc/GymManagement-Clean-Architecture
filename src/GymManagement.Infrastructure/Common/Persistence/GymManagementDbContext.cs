@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using GymManagement.Application.Common.Interfaces;
 using GymManagement.Domain.Subscriptions;
@@ -18,5 +19,11 @@ public class GymManagementDbContext : DbContext, IUnitOfWork
   public async Task CommitChangesAsync()
   {
     await base.SaveChangesAsync();
+  }
+
+  protected override void OnModelCreating(ModelBuilder modelBuilder)
+  {
+    modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+    base.OnModelCreating(modelBuilder);
   }
 }
