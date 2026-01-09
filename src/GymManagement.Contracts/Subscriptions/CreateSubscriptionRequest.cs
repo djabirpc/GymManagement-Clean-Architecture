@@ -1,7 +1,5 @@
-using GymManagement.Contracts.Subscriptions;
+namespace GymManagement.Contracts.Subscriptions;
 
-namespace GymManagement.Contracts.Subcriptions;
-
-public record class CreateSubscriptionRequest(
-  SubscriptionType SubscriptionType,
-  Guid AdminId);
+public record CreateSubscriptionRequest(
+    SubscriptionType SubscriptionType,
+    Guid AdminId);
