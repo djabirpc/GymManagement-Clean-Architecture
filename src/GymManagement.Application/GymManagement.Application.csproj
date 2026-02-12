@@ -14,6 +14,8 @@
 
   <ItemGroup>
     <Folder Include="Common\Behaviors\" />
+    <Folder Include="Gyms\Events\" />
+    <Folder Include="Subscriptions\Events\" />
   </ItemGroup>
 
 </Project>
