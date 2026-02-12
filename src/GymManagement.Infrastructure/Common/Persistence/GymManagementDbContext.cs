@@ -1,24 +1,51 @@
 using System.Reflection;
 using GymManagement.Application.Common.Interfaces;
 using GymManagement.Domain.Admins;
+using GymManagement.Domain.Common;
 using GymManagement.Domain.Gyms;
 using GymManagement.Domain.Subscriptions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace GymManagement.Infrastructure.Common.Persistence;
 
-public class GymManagementDbContext(DbContextOptions options) : DbContext(options), IUnitOfWork
+public class GymManagementDbContext(
+  DbContextOptions options, IHttpContextAccessor httpContextAccessor) : DbContext(options), IUnitOfWork
 {
+    private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
     public DbSet<Admin> Admins { get; set; } = null!;
     public DbSet<Subscription> Subscriptions { get; set; } = null!;
     public DbSet<Gym> Gyms { get; set; } = null!;
 
-    public async Task CommitChangesAsync()
+  public async Task CommitChangesAsync()
     {
-        await SaveChangesAsync();
+      // get hold of all the domain Events
+      var domainEvents = ChangeTracker.Entries<Entity>()
+          .Select(entry => entry.Entity.PopDomainEvents())
+          .SelectMany(x => x)
+          .ToList();
+
+      AddDomainEbentsToOfflineProcessingQueue(domainEvents);
+      
+      await SaveChangesAsync();
     }
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+  private void AddDomainEbentsToOfflineProcessingQueue(List<IDomainEvent> domainEvents)
+  {
+    // fetch queue from hhtp context or create a new if it doesn"t exist
+    var domainEventsQueue = _httpContextAccessor.HttpContext!.Items
+        .TryGetValue("DomainEventsQueue", out var value) && value is Queue<IDomainEvent> existingDomainEvents
+        ? existingDomainEvents
+        : new Queue<IDomainEvent>();
+
+    // add the domain events to the end of the queue
+    domainEvents.ForEach(domainEventsQueue.Enqueue);
+    
+    // store the queue in the http context
+    _httpContextAccessor.HttpContext!.Items["DomainEventsQueue"] = domainEventsQueue;
+  }
+
+  protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
