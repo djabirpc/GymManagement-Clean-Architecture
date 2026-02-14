@@ -1,9 +1,5 @@
-using System;
 using MediatR;
 
 namespace GymManagement.Domain.Common;
 
-public interface IDomainEvent : INotification
-{
-
-}
+public interface IDomainEvent : INotification;

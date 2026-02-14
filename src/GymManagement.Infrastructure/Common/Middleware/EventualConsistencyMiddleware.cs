@@ -1,4 +1,3 @@
-using System;
 using GymManagement.Domain.Common;
 using GymManagement.Infrastructure.Common.Persistence;
 using MediatR;
@@ -8,42 +7,39 @@ namespace GymManagement.Infrastructure.Common.Middleware;
 
 public class EventualConsistencyMiddleware(RequestDelegate next)
 {
-  private readonly RequestDelegate _next = next;
+    private readonly RequestDelegate _next = next;
 
-  public async Task InvokeAsync(
-    HttpContext context, 
-    IPublisher publisher,
-    GymManagementDbContext dbContext
-    )
-  {
-    var transaction = await dbContext.Database.BeginTransactionAsync();
-
-
-    context.Response.OnCompleted(async () =>
+    public async Task InvokeAsync(HttpContext context, IPublisher publisher, GymManagementDbContext dbContext)
     {
-      try
-      {
-        if(context.Items.TryGetValue("DomainEventsQueue", out var value) && value is Queue<IDomainEvent> domainEventsQueue)
+        var transaction = await dbContext.Database.BeginTransactionAsync();
+
+        context.Response.OnCompleted(async () =>
         {
-          while(domainEventsQueue!.TryDequeue(out var domainEvent))
-          {
-            await publisher.Publish(domainEvent);
-          }
-        }
+            try
+            {
+                if (context.Items.TryGetValue("DomainEventsQueue", out var value) &&
+                    value is Queue<IDomainEvent> domainEventsQueue)
+                {
+                    while (domainEventsQueue!.TryDequeue(out var domainEvent))
+                    {
+                        await publisher.Publish(domainEvent);
+                    }
+                }
 
-        await transaction.CommitAsync();
-      }
-      catch (Exception)
-      {
-        
-      }
-      finally
-      {
-        await transaction.DisposeAsync();
-      }
-    });
+                await transaction.CommitAsync();
+            }
+            catch (Exception)
+            {
+                // notify the client that even though they got a good response, the changes didn't take place
+                // due to an unexpected error
+            }
+            finally
+            {
+                await transaction.DisposeAsync();
+            }
 
-    await _next(context);
-  }
+        });
 
+        await _next(context);
+    }
 }

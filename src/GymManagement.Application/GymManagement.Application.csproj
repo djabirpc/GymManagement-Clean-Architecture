@@ -6,16 +6,10 @@
 
   <ItemGroup>
     <PackageReference Include="ErrorOr" Version="1.3.0" />
-    <PackageReference Include="FluentValidation" Version="12.1.1" />
-    <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.1" />
+    <PackageReference Include="FluentValidation" Version="11.8.1" />
+    <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
     <PackageReference Include="MediatR" Version="12.2.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Common\Behaviors\" />
-    <Folder Include="Gyms\Events\" />
-    <Folder Include="Subscriptions\Events\" />
   </ItemGroup>
 
 </Project>

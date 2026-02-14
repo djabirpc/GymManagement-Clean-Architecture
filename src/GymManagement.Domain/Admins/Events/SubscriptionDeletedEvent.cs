@@ -1,4 +1,3 @@
-using System;
 using GymManagement.Domain.Common;
 
 namespace GymManagement.Domain.Admins.Events;
